@@ -12,7 +12,7 @@ const app = express();
 // Render asigna dinámicamente el puerto
 const PORT = process.env.PORT || 3000;
 
-// CORS — permitir llamadas desde tu frontend
+// CORS — permitir llamadas desde tu frontend (Render no falla con esto)
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
@@ -25,20 +25,28 @@ app.use(express.json());
 db.pragma("foreign_keys = ON");
 console.log("📦 Base de datos SQLite conectada (better-sqlite3).");
 
-// Rutas del backend
-app.use("/api", reservasRoutes);
-
-// Ruta raíz para verificar funcionamiento
+// ===============================
+// 🌱 RUTA RAÍZ — VERIFICAR API
+// ===============================
 app.get("/", (req, res) => {
   res.send("🌱 API El Spot Orgánico funcionando correctamente.");
 });
 
-// Endpoint que Render usa para saber si está vivo
+// ===============================
+// 🔥 ENDPOINT HEALTH (Render lo usa para diagnóstico)
+// ===============================
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// Iniciar servidor
+// ===============================
+// 🚀 RUTAS DEL BACKEND
+// ===============================
+app.use("/api", reservasRoutes);
+
+// ===============================
+// 🚀 INICIAR SERVIDOR
+// ===============================
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor en marcha en http://localhost:${PORT}`);
+  console.log(`🚀 Servidor en marcha en puerto ${PORT}`);
 });
