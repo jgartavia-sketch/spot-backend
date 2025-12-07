@@ -4,11 +4,12 @@ const express = require("express");
 const cors = require("cors");
 const db = require("./Database/db");
 
+// IMPORTAR RUTAS
 const reservasRoutes = require("./routes/reservas.routes");
 
 const app = express();
 
-// Render asigna el puerto vía variable de entorno
+// *** PUERTO CORREGIDO PARA RENDER ***
 const PORT = process.env.PORT || 3000;
 
 // Middlewares
@@ -20,15 +21,15 @@ db.serialize(() => {
   console.log("📦 Base de datos SQLite conectada.");
 });
 
-// RUTAS
+// RUTAS DEL BACKEND – SOLO UNA VEZ
 app.use("/api", reservasRoutes);
 
-// Ruta raíz
+// Ruta raíz (para probar funcionamiento)
 app.get("/", (req, res) => {
   res.send("🌱 Servidor de El Spot Orgánico ONLINE");
 });
 
 // Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor en marcha en puerto ${PORT}`);
+  console.log(`🚀 Servidor en marcha en el puerto ${PORT}`);
 });
