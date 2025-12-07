@@ -9,27 +9,36 @@ const reservasRoutes = require("./routes/reservas.routes");
 
 const app = express();
 
-// *** PUERTO CORREGIDO PARA RENDER ***
+// Render asigna dinámicamente el puerto
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
-app.use(cors());
+// CORS — permitir llamadas desde tu frontend
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "authorization"]
+}));
+
 app.use(express.json());
 
 // Confirmación DB
-db.serialize(() => {
-  console.log("📦 Base de datos SQLite conectada.");
-});
+db.pragma("foreign_keys = ON");
+console.log("📦 Base de datos SQLite conectada (better-sqlite3).");
 
-// RUTAS DEL BACKEND – SOLO UNA VEZ
+// Rutas del backend
 app.use("/api", reservasRoutes);
 
-// Ruta raíz (para probar funcionamiento)
+// Ruta raíz para verificar funcionamiento
 app.get("/", (req, res) => {
-  res.send("🌱 Servidor de El Spot Orgánico ONLINE");
+  res.send("🌱 API El Spot Orgánico funcionando correctamente.");
+});
+
+// Endpoint que Render usa para saber si está vivo
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
 });
 
 // Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor en marcha en el puerto ${PORT}`);
+  console.log(`🚀 Servidor en marcha en http://localhost:${PORT}`);
 });

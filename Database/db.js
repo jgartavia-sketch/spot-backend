@@ -1,38 +1,26 @@
-// database/db.js
-const sqlite3 = require("sqlite3").verbose();
-const path = require("path");
+const Database = require("better-sqlite3");
 
-// Ruta donde se guardará el archivo de base de datos
-const dbPath = path.join(__dirname, "reservas.db");
-
-// Abre o crea la base de datos
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error("Error al abrir la base de datos:", err);
-  } else {
-    console.log("Base de datos SQLite funcionando ✨ —", dbPath);
-  }
+// Crear / abrir la base
+const db = new Database("data.db", {
+  verbose: console.log, // para debugging (podés quitarlo si querés)
 });
 
-// Crear tabla si NO existe
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS reservas (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nombre TEXT NOT NULL,
-      correo TEXT NOT NULL,
-      telefono TEXT,
-      motivo TEXT NOT NULL,
-      mensaje TEXT,
-      fecha TEXT NOT NULL
-    )
-  `, (err) => {
-    if (err) {
-      console.error("Error creando la tabla reservas:", err);
-    } else {
-      console.log("Tabla 'reservas' verificada/creada.");
-    }
-  });
-});
+// Crear tabla si no existe
+db.exec(`
+  CREATE TABLE IF NOT EXISTS reservas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    correo TEXT NOT NULL,
+    telefono TEXT,
+    motivo TEXT NOT NULL,
+    mensaje TEXT,
+    fecha TEXT NOT NULL,
+    estado TEXT DEFAULT 'pendiente',
+    fecha_creada TEXT NOT NULL,
+    fecha_actualizada TEXT NOT NULL
+  );
+`);
+
+console.log("📦 Base de datos (better-sqlite3) inicializada correctamente.");
 
 module.exports = db;
