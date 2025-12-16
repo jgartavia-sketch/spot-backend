@@ -75,7 +75,7 @@ async function crear(data) {
 async function marcarRevisada(id) {
   const [result] = await db.query(
     `UPDATE ${TABLE}
-     SET estado = 'revisada', actualizada_en = ?
+     SET estado = 'revisada', actualizado_en = ?
      WHERE id = ?`,
     [new Date(), id]
   );

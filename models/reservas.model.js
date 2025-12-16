@@ -59,7 +59,7 @@ module.exports = {
       fecha: now,
       estado: "pendiente",
       creado_en: now,
-      actualizada_en: now,
+      actualizado_en: now,
     };
   },
 };
