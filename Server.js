@@ -1,3 +1,5 @@
+const errorHandler = require("./middlewares/errorHandler");
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -42,3 +44,4 @@ require("./Database/db")
   .catch((err) => {
     console.error("⚠️ Error conectando a MySQL:", err.message);
   });
+app.use(errorHandler);
