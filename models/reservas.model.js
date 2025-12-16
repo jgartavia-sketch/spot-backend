@@ -1,7 +1,8 @@
 // models/reservas.model.js
-// Dominio de Reservas: validación + normalización
+// Dominio de Reservas: validación, normalización y estados
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ESTADOS_VALIDOS = ["pendiente", "revisada", "cerrada", "cancelada"];
 
 module.exports = {
 
@@ -16,22 +17,18 @@ module.exports = {
       return errores;
     }
 
-    // Nombre
     if (!data.nombre || data.nombre.trim().length < 2) {
       errores.push("El nombre es obligatorio y debe tener al menos 2 caracteres.");
     }
 
-    // Correo
     if (!data.correo || !EMAIL_REGEX.test(data.correo)) {
       errores.push("El correo no tiene un formato válido.");
     }
 
-    // Teléfono
     if (!data.telefono || String(data.telefono).trim().length < 8) {
       errores.push("El teléfono es obligatorio y debe ser válido.");
     }
 
-    // Fecha
     if (!data.fecha) {
       errores.push("La fecha es obligatoria.");
     } else {
@@ -47,6 +44,16 @@ module.exports = {
     }
 
     return errores;
+  },
+
+  // ===============================
+  // VALIDAR ESTADO
+  // ===============================
+  validarEstado(estado) {
+    if (!ESTADOS_VALIDOS.includes(estado)) {
+      return `Estado inválido. Estados permitidos: ${ESTADOS_VALIDOS.join(", ")}`;
+    }
+    return null;
   },
 
   // ===============================
@@ -76,12 +83,7 @@ module.exports = {
     const now = new Date();
 
     return {
-      nombre: data.nombre,
-      correo: data.correo,
-      telefono: data.telefono,
-      motivo: data.motivo,
-      mensaje: data.mensaje,
-      fecha: data.fecha,
+      ...data,
       estado: "pendiente",
       creado_en: now,
       actualizado_en: now,

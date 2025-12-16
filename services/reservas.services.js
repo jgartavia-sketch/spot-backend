@@ -28,16 +28,6 @@ async function contarTotal() {
 
 // CREAR RESERVA
 async function crear(data) {
-  const {
-    nombre,
-    correo,
-    telefono,
-    motivo,
-    mensaje,
-    fecha,
-    estado = "pendiente",
-  } = data;
-
   const now = new Date();
 
   const [result] = await db.query(
@@ -45,13 +35,13 @@ async function crear(data) {
      (nombre, correo, telefono, motivo, mensaje, fecha, estado, creado_en, actualizado_en)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      nombre,
-      correo,
-      telefono,
-      motivo,
-      mensaje,
-      fecha,
-      estado,
+      data.nombre,
+      data.correo,
+      data.telefono,
+      data.motivo,
+      data.mensaje,
+      data.fecha,
+      data.estado,
       now,
       now,
     ]
@@ -60,13 +50,13 @@ async function crear(data) {
   return result.insertId;
 }
 
-// MARCAR REVISADA
-async function marcarRevisada(id) {
+// ACTUALIZAR ESTADO
+async function actualizarEstado(id, estado) {
   const [result] = await db.query(
     `UPDATE ${TABLE}
-     SET estado = 'revisada', actualizado_en = ?
+     SET estado = ?, actualizado_en = ?
      WHERE id = ?`,
-    [new Date(), id]
+    [estado, new Date(), id]
   );
 
   return result.affectedRows > 0;
@@ -86,6 +76,6 @@ module.exports = {
   listar,
   contarTotal,
   crear,
-  marcarRevisada,
+  actualizarEstado,
   eliminar,
 };
