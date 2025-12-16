@@ -1,56 +1,74 @@
-// routes/reservas.routes.js
-
 const express = require("express");
 const router = express.Router();
 
-// Controlador
+// ===============================
+// CONTROLLER
+// ===============================
 const reservasController = require("../controllers/reservas.controller");
 
-// Autenticación (JWT)
+// ===============================
+// AUTH (JWT)
+// ===============================
 const auth = require("../auth/auth");
 
-// ===============================
-// LOGIN SIMPLE (PÚBLICO)
-// ===============================
+// =======================================
+// LOGIN ADMIN (PÚBLICO)
+// POST /api/reservas/login
+// =======================================
 router.post("/login", (req, res) => {
   const { usuario, password } = req.body;
 
+  if (!usuario || !password) {
+    return res.status(400).json({
+      ok: false,
+      msg: "Usuario y contraseña requeridos",
+    });
+  }
+
+  // ⚠️ Esto luego se mueve a BD (fase seguridad)
   if (usuario === "admin" && password === "spot1234") {
-    const token = auth.generarToken(usuario);
+    const token = auth.generarToken({ usuario });
     return res.json({ ok: true, token });
   }
 
-  return res.status(401).json({ ok: false, msg: "Credenciales incorrectas" });
+  return res.status(401).json({
+    ok: false,
+    msg: "Credenciales incorrectas",
+  });
 });
 
-// ===============================
+// =======================================
 // CREAR RESERVA (PÚBLICO)
-// ===============================
-router.post("/reservar", reservasController.crearReserva);
+// POST /api/reservas
+// =======================================
+router.post("/", reservasController.crearReserva);
 
-// ===============================
-// LISTAR RESERVAS (PROTEGIDA)
-// ===============================
+// =======================================
+// LISTAR RESERVAS (PROTEGIDO)
+// GET /api/reservas
+// =======================================
 router.get(
-  "/reservas",
+  "/",
   auth.verificarToken,
   reservasController.listarReservasPaginadas
 );
 
-// ===============================
-// MARCAR RESERVA COMO REVISADA (PROTEGIDA)
-// ===============================
+// =======================================
+// MARCAR RESERVA COMO REVISADA (PROTEGIDO)
+// PUT /api/reservas/:id/revisada
+// =======================================
 router.put(
-  "/reservas/:id/revisada",
+  "/:id/revisada",
   auth.verificarToken,
   reservasController.marcarRevisada
 );
 
-// ===============================
-// ELIMINAR RESERVA (PROTEGIDA)
-// ===============================
+// =======================================
+// ELIMINAR RESERVA (PROTEGIDO)
+// DELETE /api/reservas/:id
+// =======================================
 router.delete(
-  "/reservas/:id",
+  "/:id",
   auth.verificarToken,
   reservasController.eliminarReserva
 );

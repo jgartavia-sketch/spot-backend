@@ -1,52 +1,81 @@
-console.log("🔥 Server REAL ejecutándose — Arquitectura PRO activa");
-
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const db = require("./Database/db");
-
-// IMPORTAR RUTAS
-const reservasRoutes = require("./routes/reservas.routes");
+const path = require("path");
 
 const app = express();
 
-// Render asigna dinámicamente el puerto
-const PORT = process.env.PORT || 3000;
+// =====================================
+// CORS CONFIGURACIÓN PRO (RENDER READY)
+// =====================================
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5500",
+  "https://spot-front.onrender.com"
+];
 
-// CORS — permitir llamadas desde tu frontend (Render no falla con esto)
 app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "authorization"]
+  origin: function (origin, callback) {
+    // permitir requests sin origin (Postman, Render healthcheck)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(
+        new Error("Not allowed by CORS")
+      );
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 }));
 
+// 🔑 MUY IMPORTANTE: manejar preflight
+app.options("*", cors());
+
+// =====================================
+// MIDDLEWARES
+// =====================================
 app.use(express.json());
 
-// Confirmación DB
-db.pragma("foreign_keys = ON");
-console.log("📦 Base de datos SQLite conectada (better-sqlite3).");
+// =====================================
+// CONEXIÓN A BASE DE DATOS
+// =====================================
+require("./Database/db");
 
-// ===============================
-// 🌱 RUTA RAÍZ — VERIFICAR API
-// ===============================
+// =====================================
+// RUTAS API
+// =====================================
+const reservasRoutes = require("./routes/reservas.routes");
+const productosaRoutes = require("./routes/productosa.routes");
+
+app.use("/api/reservas", reservasRoutes);
+app.use("/api/productosa", productosaRoutes);
+
+// =====================================
+// SERVIR FRONTEND (SOLO LOCAL)
+// =====================================
+if (process.env.NODE_ENV !== "production") {
+  app.use(express.static(path.join(__dirname, "../ESO")));
+
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(__dirname, "../ESO/index.html"));
+  });
+}
+
+// =====================================
+// HEALTHCHECK (RENDER LO NECESITA)
+// =====================================
 app.get("/", (req, res) => {
-  res.send("🌱 API El Spot Orgánico funcionando correctamente.");
+  res.json({ ok: true, msg: "Backend El Spot Orgánico activo" });
 });
 
-// ===============================
-// 🔥 ENDPOINT HEALTH (Render lo usa para diagnóstico)
-// ===============================
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
-});
-
-// ===============================
-// 🚀 RUTAS DEL BACKEND
-// ===============================
-app.use("/api", reservasRoutes);
-
-// ===============================
-// 🚀 INICIAR SERVIDOR
-// ===============================
+// =====================================
+// INICIAR SERVIDOR
+// =====================================
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor en marcha en puerto ${PORT}`);
+  console.log(`🚀 Backend corriendo en puerto ${PORT}`);
 });

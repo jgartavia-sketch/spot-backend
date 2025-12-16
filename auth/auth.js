@@ -1,28 +1,44 @@
 const jwt = require("jsonwebtoken");
 
-const SECRET_KEY = "ELSPOT_SUPER_SECRETO_2025"; // podés cambiarla si querés
+// ===============================
+// CONFIGURACIÓN
+// ===============================
+const SECRET_KEY = process.env.JWT_SECRET;
 
-exports.generarToken = (usuario) => {
+// ===============================
+// GENERAR TOKEN
+// ===============================
+exports.generarToken = (payload) => {
   return jwt.sign(
-    { usuario },
+    payload,
     SECRET_KEY,
-    { expiresIn: "2h" } // dura 2 horas
+    { expiresIn: "2h" }
   );
 };
 
+// ===============================
+// VERIFICAR TOKEN
+// ===============================
 exports.verificarToken = (req, res, next) => {
-  const token = req.headers["authorization"];
+  const authHeader = req.headers["authorization"];
 
-  if (!token) {
-    return res.status(403).json({ ok: false, msg: "Token faltante" });
+  if (!authHeader) {
+    return res.status(403).json({
+      ok: false,
+      msg: "Token faltante",
+    });
   }
 
-  jwt.verify(token.replace("Bearer ", ""), SECRET_KEY, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ ok: false, msg: "Token inválido" });
-    }
+  const token = authHeader.replace("Bearer ", "");
 
-    req.usuario = decoded.usuario;
-    next(); // continuar hacia la ruta protegida
-  });
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    req.usuario = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      ok: false,
+      msg: "Token inválido o expirado",
+    });
+  }
 };

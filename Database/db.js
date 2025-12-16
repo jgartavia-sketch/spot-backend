@@ -1,26 +1,27 @@
-const Database = require("better-sqlite3");
+const mysql = require("mysql2/promise");
 
-// Crear / abrir la base
-const db = new Database("data.db", {
-  verbose: console.log, // para debugging (podés quitarlo si querés)
+console.log("🌐 Inicializando pool de conexión MySQL...");
+
+const pool = mysql.createPool({
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  port: process.env.MYSQLPORT,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
 
-// Crear tabla si no existe
-db.exec(`
-  CREATE TABLE IF NOT EXISTS reservas (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre TEXT NOT NULL,
-    correo TEXT NOT NULL,
-    telefono TEXT,
-    motivo TEXT NOT NULL,
-    mensaje TEXT,
-    fecha TEXT NOT NULL,
-    estado TEXT DEFAULT 'pendiente',
-    fecha_creada TEXT NOT NULL,
-    fecha_actualizada TEXT NOT NULL
-  );
-`);
+// Test rápido de conexión (no bloqueante)
+(async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log("✅ MySQL conectado correctamente");
+    connection.release();
+  } catch (error) {
+    console.error("❌ Error conectando a MySQL:", error.message);
+  }
+})();
 
-console.log("📦 Base de datos (better-sqlite3) inicializada correctamente.");
-
-module.exports = db;
+module.exports = pool;

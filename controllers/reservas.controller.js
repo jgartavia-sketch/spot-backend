@@ -1,132 +1,129 @@
-const db = require("../Database/db");
-const transporter = require("../email/mailer");
+// controllers/reservas.controller.js
+
+const reservasService = require("../services/reservas.services");
+const reservasModel = require("../models/reservas.model");
 
 // =======================================
 // CREAR RESERVA
 // =======================================
-exports.crearReserva = (req, res) => {
-  const { nombre, correo, telefono, motivo, mensaje, fecha } = req.body;
-
-  if (!nombre || !correo || !motivo || !fecha) {
-    return res.status(400).json({ ok: false, msg: "Datos incompletos" });
-  }
-
-  const estado = "pendiente";
-  const fecha_creada = new Date().toISOString();
-  const fecha_actualizada = fecha_creada;
-
+exports.crearReserva = async (req, res) => {
   try {
-    const stmt = db.prepare(`
-      INSERT INTO reservas (nombre, correo, telefono, motivo, mensaje, fecha, estado, fecha_creada, fecha_actualizada)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+    console.log("🔥 LLEGÓ AL CONTROLLER crearReserva");
+    console.log("📦 BODY RECIBIDO:", req.body);
 
-    const result = stmt.run(
-      nombre,
-      correo,
-      telefono,
-      motivo,
-      mensaje,
-      fecha,
-      estado,
-      fecha_creada,
-      fecha_actualizada
-    );
-
-    res.json({
-      ok: true,
-      msg: "Reserva creada con éxito",
-      id: result.lastInsertRowid
-    });
-
-    // Enviar correo (opcional)
-    try {
-      transporter.sendMail({
-        from: "Sistema Reservas <noreply@spot.com>",
-        to: correo,
-        subject: "Reserva recibida",
-        html: `<p>Hemos recibido tu reserva, ${nombre}</p>`
-      });
-    } catch (e) {
-      console.log("⚠ No se pudo enviar correo al cliente");
+    // Validación
+    const errores = reservasModel.validar(req.body);
+    if (errores.length) {
+      console.warn("⚠️ Errores de validación:", errores);
+      return res.status(400).json({ ok: false, errores });
     }
 
-  } catch (err) {
-    console.log("❌ Error guardando reserva:", err);
-    return res.status(500).json({ ok: false, msg: "Error guardando reserva" });
+    // Normalizar datos
+    const limpio = reservasModel.normalizar(req.body);
+    console.log("🧼 Datos normalizados:", limpio);
+
+    // Crear objeto final según contrato DB
+    const reserva = reservasModel.crearObjetoReserva(limpio);
+    console.log("🧱 Objeto final para DB:", reserva);
+
+    console.log("🧠 VOY A INSERTAR EN DB...");
+    const id = await reservasService.crear(reserva);
+    console.log("✅ INSERT EJECUTADO, ID:", id);
+
+    return res.json({
+      ok: true,
+      msg: "Reserva creada con éxito",
+      id
+    });
+
+  } catch (error) {
+    console.error("❌ ERROR REAL AL INSERTAR RESERVA:", error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error guardando reserva"
+    });
   }
 };
 
 // =======================================
-// LISTAR RESERVAS (paginadas)
+// LISTAR RESERVAS PAGINADAS
 // =======================================
-exports.listarReservasPaginadas = (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const offset = (page - 1) * limit;
-
+exports.listarReservasPaginadas = async (req, res) => {
   try {
-    const stmt = db.prepare(`
-      SELECT * FROM reservas
-      ORDER BY fecha_creada DESC
-      LIMIT ? OFFSET ?
-    `);
-    const rows = stmt.all(limit, offset);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
-    const total = db.prepare("SELECT COUNT(*) AS total FROM reservas").get().total;
+    const data = await reservasService.listar({ page, limit });
+    const total = await reservasService.contarTotal();
 
-    res.json({
+    return res.json({
       ok: true,
       page,
       totalPages: Math.ceil(total / limit),
-      data: rows
+      data
     });
 
-  } catch (err) {
-    console.log("❌ Error obteniendo reservas:", err);
-    return res.status(500).json({ ok: false, msg: "Error obteniendo reservas" });
+  } catch (error) {
+    console.error("❌ Error obteniendo reservas:", error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error obteniendo reservas"
+    });
   }
 };
 
 // =======================================
 // MARCAR RESERVA COMO REVISADA
 // =======================================
-exports.marcarRevisada = (req, res) => {
-  const id = req.params.id;
-
+exports.marcarRevisada = async (req, res) => {
   try {
-    db.prepare(`
-      UPDATE reservas
-      SET estado = 'revisada',
-          fecha_actualizada = ?
-      WHERE id = ?
-    `).run(new Date().toISOString(), id);
+    const ok = await reservasService.marcarRevisada(req.params.id);
 
-    res.json({ ok: true, msg: "Reserva revisada correctamente" });
+    if (!ok) {
+      return res.status(404).json({
+        ok: false,
+        msg: "Reserva no encontrada"
+      });
+    }
 
-  } catch (err) {
-    console.log("❌ Error actualizando reserva:", err);
-    return res.status(500).json({ ok: false, msg: "Error actualizando reserva" });
+    return res.json({
+      ok: true,
+      msg: "Reserva marcada como revisada"
+    });
+
+  } catch (error) {
+    console.error("❌ Error actualizando reserva:", error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error actualizando reserva"
+    });
   }
 };
 
 // =======================================
 // ELIMINAR RESERVA
 // =======================================
-exports.eliminarReserva = (req, res) => {
-  const id = req.params.id;
-
+exports.eliminarReserva = async (req, res) => {
   try {
-    const result = db.prepare("DELETE FROM reservas WHERE id = ?").run(id);
+    const ok = await reservasService.eliminar(req.params.id);
 
-    if (result.changes === 0) {
-      return res.status(404).json({ ok: false, msg: "Reserva no encontrada" });
+    if (!ok) {
+      return res.status(404).json({
+        ok: false,
+        msg: "Reserva no encontrada"
+      });
     }
 
-    res.json({ ok: true, msg: "Reserva eliminada correctamente" });
+    return res.json({
+      ok: true,
+      msg: "Reserva eliminada correctamente"
+    });
 
-  } catch (err) {
-    console.log("❌ Error eliminando reserva:", err);
-    return res.status(500).json({ ok: false, msg: "Error eliminando reserva" });
+  } catch (error) {
+    console.error("❌ Error eliminando reserva:", error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error eliminando reserva"
+    });
   }
 };
