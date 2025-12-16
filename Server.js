@@ -4,30 +4,41 @@ const cors = require("cors");
 
 const app = express();
 
-// =====================================
+// =====================
 // MIDDLEWARES
-// =====================================
+// =====================
 app.use(cors());
 app.use(express.json());
 
-// =====================================
-// CONEXIÓN A BASE DE DATOS
-// =====================================
-require("./Database/db");
+// =====================
+// RUTAS
+// =====================
+app.use("/api/reservas", require("./routes/reservas.routes"));
 
-// =====================================
-// RUTAS API
-// =====================================
-const reservasRoutes = require("./routes/reservas.routes");
-const productosaRoutes = require("./routes/productosa.routes");
-
-app.use("/api/reservas", reservasRoutes);
-app.use("/api/productosa", productosaRoutes);
-
-// =====================================
-// INICIAR SERVIDOR (RENDER)
-// =====================================
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log(`🚀 Backend corriendo en puerto ${PORT}`);
+// =====================
+// HEALTH CHECK (CLAVE)
+// =====================
+app.get("/", (req, res) => {
+  res.send("Backend SPOT corriendo OK");
 });
+
+// =====================
+// SERVER LISTEN (ANTES DB)
+// =====================
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+});
+
+// =====================
+// DB (NO BLOQUEANTE)
+// =====================
+require("./Database/db")
+  .getConnection()
+  .then(() => {
+    console.log("✅ Conectado a MySQL (Railway)");
+  })
+  .catch((err) => {
+    console.error("⚠️ Error conectando a MySQL:", err.message);
+  });
