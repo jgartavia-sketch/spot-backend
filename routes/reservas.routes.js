@@ -7,9 +7,23 @@ const router = express.Router();
 const reservasController = require("../controllers/reservas.controller");
 
 // ===============================
+// HELPERS DE SEGURIDAD
+// ===============================
+const safe = (fn) => {
+  if (typeof fn !== "function") {
+    return (req, res) =>
+      res.status(500).json({
+        ok: false,
+        msg: "Handler no disponible en el servidor"
+      });
+  }
+  return fn;
+};
+
+// =======================================
 // LOGIN ADMIN (PÚBLICO)
 // POST /api/reservas/login
-// ===============================
+// =======================================
 router.post("/login", (req, res) => {
   const { usuario, password } = req.body;
 
@@ -20,7 +34,6 @@ router.post("/login", (req, res) => {
     });
   }
 
-  // ⚠️ Auth simple temporal (fase seguridad luego)
   if (usuario === "admin" && password === "spot1234") {
     return res.json({
       ok: true,
@@ -38,24 +51,30 @@ router.post("/login", (req, res) => {
 // CREAR RESERVA (PÚBLICO)
 // POST /api/reservas
 // =======================================
-router.post("/", reservasController.crearReserva);
+router.post("/", safe(reservasController.crearReserva));
 
 // =======================================
-// LISTAR RESERVAS (TEMP SIN AUTH)
+// LISTAR RESERVAS
 // GET /api/reservas
 // =======================================
-router.get("/", reservasController.listarReservasPaginadas);
+router.get("/", safe(reservasController.listarReservasPaginadas));
 
 // =======================================
-// MARCAR RESERVA COMO REVISADA (TEMP SIN AUTH)
+// MARCAR RESERVA COMO REVISADA
 // PUT /api/reservas/:id/revisada
 // =======================================
-router.put("/:id/revisada", reservasController.marcarRevisada);
+router.put(
+  "/:id/revisada",
+  safe(reservasController.marcarRevisada)
+);
 
 // =======================================
-// ELIMINAR RESERVA (TEMP SIN AUTH)
+// ELIMINAR RESERVA
 // DELETE /api/reservas/:id
 // =======================================
-router.delete("/:id", reservasController.eliminarReserva);
+router.delete(
+  "/:id",
+  safe(reservasController.eliminarReserva)
+);
 
 module.exports = router;
