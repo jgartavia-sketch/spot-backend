@@ -7,14 +7,9 @@ const router = express.Router();
 const reservasController = require("../controllers/reservas.controller");
 
 // ===============================
-// AUTH (JWT)
-// ===============================
-const auth = require("../auth/auth");
-
-// =======================================
 // LOGIN ADMIN (PÚBLICO)
 // POST /api/reservas/login
-// =======================================
+// ===============================
 router.post("/login", (req, res) => {
   const { usuario, password } = req.body;
 
@@ -25,10 +20,12 @@ router.post("/login", (req, res) => {
     });
   }
 
-  // ⚠️ Esto luego se mueve a BD (fase seguridad)
+  // ⚠️ Auth simple temporal (fase seguridad luego)
   if (usuario === "admin" && password === "spot1234") {
-    const token = auth.generarToken({ usuario });
-    return res.json({ ok: true, token });
+    return res.json({
+      ok: true,
+      token: "TEMP_TOKEN_DEV"
+    });
   }
 
   return res.status(401).json({
@@ -44,33 +41,21 @@ router.post("/login", (req, res) => {
 router.post("/", reservasController.crearReserva);
 
 // =======================================
-// LISTAR RESERVAS (PROTEGIDO)
+// LISTAR RESERVAS (TEMP SIN AUTH)
 // GET /api/reservas
 // =======================================
-router.get(
-  "/",
-  auth.verificarToken,
-  reservasController.listarReservasPaginadas
-);
+router.get("/", reservasController.listarReservasPaginadas);
 
 // =======================================
-// MARCAR RESERVA COMO REVISADA (PROTEGIDO)
+// MARCAR RESERVA COMO REVISADA (TEMP SIN AUTH)
 // PUT /api/reservas/:id/revisada
 // =======================================
-router.put(
-  "/:id/revisada",
-  auth.verificarToken,
-  reservasController.marcarRevisada
-);
+router.put("/:id/revisada", reservasController.marcarRevisada);
 
 // =======================================
-// ELIMINAR RESERVA (PROTEGIDO)
+// ELIMINAR RESERVA (TEMP SIN AUTH)
 // DELETE /api/reservas/:id
 // =======================================
-router.delete(
-  "/:id",
-  auth.verificarToken,
-  reservasController.eliminarReserva
-);
+router.delete("/:id", reservasController.eliminarReserva);
 
 module.exports = router;
