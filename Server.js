@@ -30,8 +30,8 @@ app.use("/api/productosa", productosaRoutes);
 // =====================================
 app.use(express.static(path.join(__dirname, "../ESO")));
 
-// ⚠️ CATCH-ALL CORRECTO (SIN "*")
-app.get("/*", (req, res) => {
+// ✅ CATCH-ALL CORRECTO (Express + Node 22 SAFE)
+app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, "../ESO/index.html"));
 });
 
