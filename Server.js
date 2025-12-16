@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 
 const app = express();
 
@@ -26,19 +25,9 @@ app.use("/api/reservas", reservasRoutes);
 app.use("/api/productosa", productosaRoutes);
 
 // =====================================
-// SERVIR FRONTEND (ESO)
+// INICIAR SERVIDOR (RENDER)
 // =====================================
-app.use(express.static(path.join(__dirname, "../ESO")));
-
-// ✅ CATCH-ALL CORRECTO (Express + Node 22 SAFE)
-app.get(/^\/(?!api).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, "../ESO/index.html"));
-});
-
-// =====================================
-// INICIAR SERVIDOR
-// =====================================
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`🚀 Backend corriendo en puerto ${PORT}`);
 });
