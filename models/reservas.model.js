@@ -1,4 +1,3 @@
-// backend/models/reservas.model.js
 // Modelo de dominio para Reservas (validación + normalización)
 
 module.exports = {
@@ -22,6 +21,10 @@ module.exports = {
       errores.push("El correo es obligatorio.");
     }
 
+    if (!data.fecha || data.fecha.trim() === "") {
+      errores.push("La fecha es obligatoria.");
+    }
+
     return errores;
   },
 
@@ -41,6 +44,7 @@ module.exports = {
         data.mensaje && data.mensaje.trim() !== ""
           ? data.mensaje.trim()
           : null,
+      fecha: data.fecha.trim(), // 👈 ahora sí
     };
   },
 
@@ -56,7 +60,7 @@ module.exports = {
       telefono: data.telefono,
       motivo: data.motivo,
       mensaje: data.mensaje,
-      fecha: now,
+      fecha: data.fecha, // 👈 la fecha del usuario
       estado: "pendiente",
       creado_en: now,
       actualizado_en: now,
