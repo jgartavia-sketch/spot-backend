@@ -14,7 +14,7 @@ async function listar({ page = 1, limit = 20 }) {
   const [rows] = await db.query(
     `SELECT id, nombre, correo, telefono, motivo, mensaje, fecha, creado_en, estado, actualizado_en
      FROM ${TABLE}
-     ORDER BY fecha_creada DESC
+     ORDER BY creado_en DESC
      LIMIT ? OFFSET ?`,
     [Number(limit), Number(offset)]
   );
@@ -51,7 +51,7 @@ async function crear(data) {
 
   const [result] = await db.query(
     `INSERT INTO ${TABLE}
-     (nombre, correo, telefono, motivo, mensaje, fecha, estado, creado_en, actualizada_en)
+     (nombre, correo, telefono, motivo, mensaje, fecha, estado, creado_en, actualizado_en)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       nombre,
