@@ -19,10 +19,45 @@ app.use(express.json());
 app.use("/api/reservas", require("./routes/reservas.routes"));
 
 // =====================
-// HEALTH CHECK
+// HEALTH CHECKS PRO
 // =====================
-app.get("/", (req, res) => {
-  res.send("Backend SPOT corriendo OK");
+
+// Liveness: proceso vivo
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Readiness: app lista (sin bloquear)
+let dbReady = false;
+
+require("./Database/db")
+  .getConnection()
+  .then(() => {
+    dbReady = true;
+    logger.info("Conectado a MySQL (Railway)");
+  })
+  .catch((err) => {
+    dbReady = false;
+    logger.error("Error conectando a MySQL", { error: err.message });
+  });
+
+app.get("/ready", (req, res) => {
+  if (!dbReady) {
+    return res.status(503).json({
+      status: "not_ready",
+      reason: "DB no disponible",
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  res.json({
+    status: "ready",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // =====================
@@ -33,18 +68,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   logger.info("Servidor iniciado", { port: PORT });
 });
-
-// =====================
-// DB (NO BLOQUEANTE)
-// =====================
-require("./Database/db")
-  .getConnection()
-  .then(() => {
-    logger.info("Conectado a MySQL (Railway)");
-  })
-  .catch((err) => {
-    logger.error("Error conectando a MySQL", { error: err.message });
-  });
 
 // =====================
 // ERROR HANDLER GLOBAL (SIEMPRE AL FINAL)
