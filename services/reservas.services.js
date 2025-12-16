@@ -12,7 +12,7 @@ async function listar({ page = 1, limit = 20 }) {
   const offset = (page - 1) * limit;
 
   const [rows] = await db.query(
-    `SELECT id, nombre, correo, telefono, motivo, mensaje, fecha, estado, fecha_creada, fecha_actualizada
+    `SELECT id, nombre, correo, telefono, motivo, mensaje, fecha, creado_en, estado, actualizado_en
      FROM ${TABLE}
      ORDER BY fecha_creada DESC
      LIMIT ? OFFSET ?`,
