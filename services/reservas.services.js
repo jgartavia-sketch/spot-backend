@@ -1,13 +1,9 @@
 // services/reservas.services.js
-// Lógica de acceso a datos para la tabla `reservas`
-
 const db = require("../Database/db");
 
 const TABLE = "reservas";
 
-// ============================================
-// LISTAR RESERVAS (PAGINADAS)
-// ============================================
+// LISTAR RESERVAS
 async function listar({ page = 1, limit = 20 }) {
   const offset = (page - 1) * limit;
 
@@ -22,20 +18,15 @@ async function listar({ page = 1, limit = 20 }) {
   return rows;
 }
 
-// ============================================
-// CONTAR TOTAL DE RESERVAS
-// ============================================
+// CONTAR TOTAL
 async function contarTotal() {
   const [rows] = await db.query(
     `SELECT COUNT(*) AS total FROM ${TABLE}`
   );
-
   return rows[0].total;
 }
 
-// ============================================
 // CREAR RESERVA
-// ============================================
 async function crear(data) {
   const {
     nombre,
@@ -69,9 +60,7 @@ async function crear(data) {
   return result.insertId;
 }
 
-// ============================================
-// MARCAR RESERVA COMO REVISADA
-// ============================================
+// MARCAR REVISADA
 async function marcarRevisada(id) {
   const [result] = await db.query(
     `UPDATE ${TABLE}
@@ -83,9 +72,7 @@ async function marcarRevisada(id) {
   return result.affectedRows > 0;
 }
 
-// ============================================
-// ELIMINAR RESERVA
-// ============================================
+// ELIMINAR
 async function eliminar(id) {
   const [result] = await db.query(
     `DELETE FROM ${TABLE} WHERE id = ?`,
