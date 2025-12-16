@@ -6,38 +6,9 @@ const path = require("path");
 const app = express();
 
 // =====================================
-// CORS CONFIGURACIÓN PRO (RENDER READY)
-// =====================================
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:5500",
-  "https://spot-front.onrender.com"
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // permitir requests sin origin (Postman, Render healthcheck)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(
-        new Error("Not allowed by CORS")
-      );
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
-
-// 🔑 MUY IMPORTANTE: manejar preflight
-app.options("*", cors());
-
-// =====================================
 // MIDDLEWARES
 // =====================================
+app.use(cors());
 app.use(express.json());
 
 // =====================================
@@ -55,21 +26,13 @@ app.use("/api/reservas", reservasRoutes);
 app.use("/api/productosa", productosaRoutes);
 
 // =====================================
-// SERVIR FRONTEND (SOLO LOCAL)
+// SERVIR FRONTEND (ESO)
 // =====================================
-if (process.env.NODE_ENV !== "production") {
-  app.use(express.static(path.join(__dirname, "../ESO")));
+app.use(express.static(path.join(__dirname, "../ESO")));
 
-  app.get(/^\/(?!api).*/, (req, res) => {
-    res.sendFile(path.join(__dirname, "../ESO/index.html"));
-  });
-}
-
-// =====================================
-// HEALTHCHECK (RENDER LO NECESITA)
-// =====================================
-app.get("/", (req, res) => {
-  res.json({ ok: true, msg: "Backend El Spot Orgánico activo" });
+// ⚠️ CATCH-ALL CORRECTO (SIN "*")
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../ESO/index.html"));
 });
 
 // =====================================
