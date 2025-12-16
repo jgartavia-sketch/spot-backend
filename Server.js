@@ -1,8 +1,9 @@
-const errorHandler = require("./middlewares/errorHandler");
-
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+
+const logger = require("./utils/logger");
+const errorHandler = require("./middlewares/errorHandler");
 
 const app = express();
 
@@ -18,19 +19,19 @@ app.use(express.json());
 app.use("/api/reservas", require("./routes/reservas.routes"));
 
 // =====================
-// HEALTH CHECK (CLAVE)
+// HEALTH CHECK
 // =====================
 app.get("/", (req, res) => {
   res.send("Backend SPOT corriendo OK");
 });
 
 // =====================
-// SERVER LISTEN (ANTES DB)
+// SERVER LISTEN (NO BLOQUEANTE)
 // =====================
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+  logger.info("Servidor iniciado", { port: PORT });
 });
 
 // =====================
@@ -39,9 +40,13 @@ app.listen(PORT, () => {
 require("./Database/db")
   .getConnection()
   .then(() => {
-    console.log("✅ Conectado a MySQL (Railway)");
+    logger.info("Conectado a MySQL (Railway)");
   })
   .catch((err) => {
-    console.error("⚠️ Error conectando a MySQL:", err.message);
+    logger.error("Error conectando a MySQL", { error: err.message });
   });
+
+// =====================
+// ERROR HANDLER GLOBAL (SIEMPRE AL FINAL)
+// =====================
 app.use(errorHandler);
