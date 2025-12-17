@@ -1,18 +1,45 @@
+// routes/reservas.routes.js
+
 const express = require("express");
 const router = express.Router();
 
 const reservasController = require("../controllers/reservas.controller");
+const auth = require("../middlewares/auth");
 
-// CREAR RESERVA
+// =======================================
+// CREAR RESERVA (PÚBLICO)
+// POST /api/reservas
+// =======================================
 router.post("/", reservasController.crearReserva);
 
-// LISTAR RESERVAS
-router.get("/", reservasController.listarReservasPaginadas);
+// =======================================
+// LISTAR RESERVAS (PROTEGIDO)
+// GET /api/reservas
+// =======================================
+router.get(
+  "/",
+  auth,
+  reservasController.listarReservasPaginadas
+);
 
-// ACTUALIZAR ESTADO
-router.put("/:id/estado", reservasController.actualizarEstado);
+// =======================================
+// ACTUALIZAR ESTADO (PROTEGIDO)
+// PUT /api/reservas/:id/estado
+// =======================================
+router.put(
+  "/:id/estado",
+  auth,
+  reservasController.actualizarEstado
+);
 
-// ELIMINAR
-router.delete("/:id", reservasController.eliminarReserva);
+// =======================================
+// ELIMINAR RESERVA (PROTEGIDO)
+// DELETE /api/reservas/:id
+// =======================================
+router.delete(
+  "/:id",
+  auth,
+  reservasController.eliminarReserva
+);
 
 module.exports = router;
