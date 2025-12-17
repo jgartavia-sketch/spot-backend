@@ -17,6 +17,7 @@ app.use(express.json());
 // RUTAS
 // =====================
 app.use("/api/reservas", require("./routes/reservas.routes"));
+app.use("/api/auth", require("./routes/auth.routes"));
 
 // =====================
 // HEALTH CHECKS PRO
@@ -61,7 +62,7 @@ app.get("/ready", (req, res) => {
 });
 
 // =====================
-// SERVER LISTEN (NO BLOQUEANTE)
+// SERVER LISTEN
 // =====================
 const PORT = process.env.PORT || 3000;
 
