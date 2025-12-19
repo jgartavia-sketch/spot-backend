@@ -85,3 +85,12 @@ app.use(
   "/admin",
   express.static(path.join(__dirname, "../ESO/admin"))
 );
+const path = require("path");
+
+// FRONTEND ESTÁTICO
+app.use(express.static(path.join(__dirname, "ESO")));
+
+// LOGIN ADMIN
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "ESO", "admin", "login.html"));
+});
