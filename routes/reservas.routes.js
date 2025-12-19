@@ -5,16 +5,15 @@ const router = express.Router();
 
 const reservasController = require("../controllers/reservas.controller");
 const auth = require("../middlewares/auth");
+const requireAdmin = require("../middlewares/requireAdmin");
 
 // =======================================
 // CREAR RESERVA (PÚBLICO)
-// POST /api/reservas
 // =======================================
 router.post("/", reservasController.crearReserva);
 
 // =======================================
-// LISTAR RESERVAS (PROTEGIDO)
-// GET /api/reservas
+// LISTAR RESERVAS (TOKEN)
 // =======================================
 router.get(
   "/",
@@ -23,22 +22,22 @@ router.get(
 );
 
 // =======================================
-// ACTUALIZAR ESTADO (PROTEGIDO)
-// PUT /api/reservas/:id/estado
+// ACTUALIZAR ESTADO (ADMIN)
 // =======================================
 router.put(
   "/:id/estado",
   auth,
+  requireAdmin,
   reservasController.actualizarEstado
 );
 
 // =======================================
-// ELIMINAR RESERVA (PROTEGIDO)
-// DELETE /api/reservas/:id
+// ELIMINAR RESERVA (ADMIN)
 // =======================================
 router.delete(
   "/:id",
   auth,
+  requireAdmin,
   reservasController.eliminarReserva
 );
 

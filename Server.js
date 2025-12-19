@@ -17,6 +17,8 @@ app.use(express.json());
 // RUTAS
 // =====================
 app.use("/api/reservas", require("./routes/reservas.routes"));
+
+
 app.use("/api/auth", require("./routes/auth.routes"));
 
 // =====================
@@ -74,3 +76,12 @@ app.listen(PORT, () => {
 // ERROR HANDLER GLOBAL (SIEMPRE AL FINAL)
 // =====================
 app.use(errorHandler);
+const path = require("path");
+
+// ===============================
+// FRONTEND ADMIN (LOGIN + DASH)
+// ===============================
+app.use(
+  "/admin",
+  express.static(path.join(__dirname, "../ESO/admin"))
+);
