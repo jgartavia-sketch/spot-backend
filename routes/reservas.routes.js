@@ -1,80 +1,44 @@
+// routes/reservas.routes.js
+
 const express = require("express");
 const router = express.Router();
 
-// ===============================
-// CONTROLLER
-// ===============================
 const reservasController = require("../controllers/reservas.controller");
-
-// ===============================
-// HELPERS DE SEGURIDAD
-// ===============================
-const safe = (fn) => {
-  if (typeof fn !== "function") {
-    return (req, res) =>
-      res.status(500).json({
-        ok: false,
-        msg: "Handler no disponible en el servidor"
-      });
-  }
-  return fn;
-};
-
-// =======================================
-// LOGIN ADMIN (PÚBLICO)
-// POST /api/reservas/login
-// =======================================
-router.post("/login", (req, res) => {
-  const { usuario, password } = req.body;
-
-  if (!usuario || !password) {
-    return res.status(400).json({
-      ok: false,
-      msg: "Usuario y contraseña requeridos",
-    });
-  }
-
-  if (usuario === "admin" && password === "spot1234") {
-    return res.json({
-      ok: true,
-      token: "TEMP_TOKEN_DEV"
-    });
-  }
-
-  return res.status(401).json({
-    ok: false,
-    msg: "Credenciales incorrectas",
-  });
-});
+const auth = require("../middlewares/auth");
+const requireAdmin = require("../middlewares/requireAdmin");
 
 // =======================================
 // CREAR RESERVA (PÚBLICO)
-// POST /api/reservas
 // =======================================
-router.post("/", safe(reservasController.crearReserva));
+router.post("/", reservasController.crearReserva);
 
 // =======================================
-// LISTAR RESERVAS
-// GET /api/reservas
+// LISTAR RESERVAS (TOKEN)
 // =======================================
-router.get("/", safe(reservasController.listarReservasPaginadas));
-
-// =======================================
-// MARCAR RESERVA COMO REVISADA
-// PUT /api/reservas/:id/revisada
-// =======================================
-router.put(
-  "/:id/revisada",
-  safe(reservasController.marcarRevisada)
+router.get(
+  "/",
+  auth,
+  reservasController.listarReservasPaginadas
 );
 
 // =======================================
-// ELIMINAR RESERVA
-// DELETE /api/reservas/:id
+// ACTUALIZAR ESTADO (ADMIN)
+// =======================================
+router.put(
+  "/:id/estado",
+  auth,
+  requireAdmin,
+  reservasController.actualizarEstado
+);
+
+// =======================================
+// ELIMINAR RESERVA (ADMIN)
 // =======================================
 router.delete(
   "/:id",
-  safe(reservasController.eliminarReserva)
+  auth,
+  requireAdmin,
+  reservasController.eliminarReserva
 );
 
 module.exports = router;

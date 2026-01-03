@@ -9,11 +9,12 @@ const app = express();
 // =====================================
 app.use(
   cors({
-    origin: "*", // En producción lo ideal es poner tu dominio del front
+    origin: "*",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 app.use(express.json());
 
 // =====================================
@@ -42,7 +43,7 @@ app.use("/api/reservas", reservasRoutes);
 app.use("/api/productosa", productosaRoutes);
 
 // =====================================
-// 404 (opcional pero pro)
+// 404
 // =====================================
 app.use((req, res) => {
   res.status(404).json({ ok: false, msg: "Ruta no encontrada" });

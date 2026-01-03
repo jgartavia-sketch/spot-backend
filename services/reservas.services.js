@@ -1,13 +1,9 @@
 // services/reservas.services.js
-// Lógica de acceso a datos para la tabla `reservas`
-
 const db = require("../Database/db");
 
 const TABLE = "reservas";
 
-// ============================================
-// LISTAR RESERVAS (PAGINADAS)
-// ============================================
+// LISTAR RESERVAS
 async function listar({ page = 1, limit = 20 }) {
   const offset = (page - 1) * limit;
 
@@ -22,31 +18,16 @@ async function listar({ page = 1, limit = 20 }) {
   return rows;
 }
 
-// ============================================
-// CONTAR TOTAL DE RESERVAS
-// ============================================
+// CONTAR TOTAL
 async function contarTotal() {
   const [rows] = await db.query(
     `SELECT COUNT(*) AS total FROM ${TABLE}`
   );
-
   return rows[0].total;
 }
 
-// ============================================
 // CREAR RESERVA
-// ============================================
 async function crear(data) {
-  const {
-    nombre,
-    correo,
-    telefono,
-    motivo,
-    mensaje,
-    fecha,
-    estado = "pendiente",
-  } = data;
-
   const now = new Date();
 
   const [result] = await db.query(
@@ -54,13 +35,13 @@ async function crear(data) {
      (nombre, correo, telefono, motivo, mensaje, fecha, estado, creado_en, actualizado_en)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      nombre,
-      correo,
-      telefono,
-      motivo,
-      mensaje,
-      fecha,
-      estado,
+      data.nombre,
+      data.correo,
+      data.telefono,
+      data.motivo,
+      data.mensaje,
+      data.fecha,
+      data.estado,
       now,
       now,
     ]
@@ -69,23 +50,19 @@ async function crear(data) {
   return result.insertId;
 }
 
-// ============================================
-// MARCAR RESERVA COMO REVISADA
-// ============================================
-async function marcarRevisada(id) {
+// ACTUALIZAR ESTADO
+async function actualizarEstado(id, estado) {
   const [result] = await db.query(
     `UPDATE ${TABLE}
-     SET estado = 'revisada', actualizado_en = ?
+     SET estado = ?, actualizado_en = ?
      WHERE id = ?`,
-    [new Date(), id]
+    [estado, new Date(), id]
   );
 
   return result.affectedRows > 0;
 }
 
-// ============================================
-// ELIMINAR RESERVA
-// ============================================
+// ELIMINAR
 async function eliminar(id) {
   const [result] = await db.query(
     `DELETE FROM ${TABLE} WHERE id = ?`,
@@ -99,6 +76,6 @@ module.exports = {
   listar,
   contarTotal,
   crear,
-  marcarRevisada,
+  actualizarEstado,
   eliminar,
 };
