@@ -85,7 +85,7 @@ app.use(
   "/admin",
   express.static(path.join(__dirname, "../ESO/admin"))
 );
-const path = require("path");
+
 
 // FRONTEND ESTÁTICO
 app.use(express.static(path.join(__dirname, "ESO")));
