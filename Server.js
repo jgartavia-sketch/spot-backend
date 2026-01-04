@@ -38,9 +38,11 @@ app.get("/health", (req, res) => {
 // =====================================
 const reservasRoutes = require("./routes/reservas.routes");
 const productosaRoutes = require("./routes/productosa.routes");
+const ordenesRoutes = require("./routes/ordenes.routes");
 
 app.use("/api/reservas", reservasRoutes);
 app.use("/api/productosa", productosaRoutes);
+app.use("/api/ordenes", ordenesRoutes);
 
 // =====================================
 // 404
