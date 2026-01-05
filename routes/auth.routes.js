@@ -7,7 +7,8 @@ const authController = require("../controllers/auth.controller");
 
 // =======================================
 // LOGIN
-// POST /api/auth/login
+// Ruta final dependerá del app.use() en server.js
+// Ej: app.use("/api/auth", router) => POST /api/auth/login
 // =======================================
 router.post("/login", authController.login);
 
