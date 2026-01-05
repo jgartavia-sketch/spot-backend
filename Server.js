@@ -26,7 +26,8 @@ require("./Database/db");
 // HEALTHCHECK + ROOT (para Render)
 // =====================================
 app.get("/", (req, res) => {
-  res.json({ ok: true, msg: "El Spot Orgánico Backend OK ✅" });
+  res.json({ ok: true, msg: "El Spot Orgánico Backend OK ✅ vAUTH-1" });
+
 });
 
 app.get("/health", (req, res) => {
@@ -39,10 +40,14 @@ app.get("/health", (req, res) => {
 const reservasRoutes = require("./routes/reservas.routes");
 const productosaRoutes = require("./routes/productosa.routes");
 const ordenesRoutes = require("./routes/ordenes.routes");
+const authRoutes = require("./routes/auth.routes"); // ✅ NUEVO
 
 app.use("/api/reservas", reservasRoutes);
 app.use("/api/productosa", productosaRoutes);
 app.use("/api/ordenes", ordenesRoutes);
+
+// ✅ NUEVO: auth (login)
+app.use("/api/auth", authRoutes);
 
 // =====================================
 // 404
