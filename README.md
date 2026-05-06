@@ -1,34 +1,36 @@
-# El Spot Orgánico – Backend
+# Spot Orgánico Backend
 
-## Descripción
-API backend para la gestión de productos orgánicos, reservaciones, usuarios y operaciones del sistema.
+Backend y API REST para la plataforma Spot Orgánico.
+
+---
+
+## Funcionalidades
+
+- API REST
+- Autenticación JWT
+- Gestión de reservas
+- Gestión de órdenes
+- Panel administrativo
+- Integración con MySQL
+
+---
 
 ## Tecnologías
+
 - Node.js
 - Express
-- PostgreSQL (si aplica)
+- MySQL
+- JWT
+- Render
 
-## Requisitos
-- Node.js
-- Base de datos configurada
+---
 
-## Instalación
+## Frontend
 
-Clonar el repositorio:
+https://spot-organico.vercel.app
 
-git clone https://github.com/jgartavia-sketch/spot-backend.git
+---
 
-Entrar al proyecto:
+## Estado
 
-cd spot-backend
-
-Instalar dependencias:
-
-npm install
-
-Ejecutar servidor:
-
-npm run start
-
-## Nota
-Este backend provee los servicios para el frontend del proyecto "El Spot Orgánico".
+Backend funcional desplegado en producción.
