@@ -1,37 +1,82 @@
-const ordenesService = require("../services/ordenes.services");
+// controllers/ordenes.controller.js
 
-// POST /api/ordenes
+// ===============================
+// BASE TEMPORAL EN MEMORIA
+// ===============================
+
+let ordenes = [
+  {
+    id: 1,
+    estado: "PENDIENTE",
+    total: 12500,
+    creado_en: "2026-05-05 10:30 AM",
+  },
+  {
+    id: 2,
+    estado: "PAGADO",
+    total: 21900,
+    creado_en: "2026-05-05 02:10 PM",
+  },
+];
+
+// ===============================
+// GET - LISTAR ÓRDENES
+// ===============================
+
+exports.obtenerOrdenes = async (req, res) => {
+  return res.json({
+    ok: true,
+    total: ordenes.length,
+    data: ordenes,
+  });
+};
+
+// ===============================
+// POST - CREAR ORDEN
+// ===============================
+
 exports.crearOrden = async (req, res) => {
-  try {
-    const result = await ordenesService.crearOrden(req.body);
-    return res.status(201).json({ ok: true, ...result });
-  } catch (err) {
-    console.error("❌ Error crearOrden:", err.message);
-    return res.status(400).json({ ok: false, msg: err.message });
-  }
+  console.log("🔥 DEBUG /api/ordenes LLEGÓ AQUÍ");
+  console.log("📦 BODY:", req.body);
+
+  const nuevaOrden = {
+    id: Date.now(),
+    estado: "PENDIENTE",
+    total: req.body?.total || 0,
+    creado_en: new Date().toLocaleString(),
+  };
+
+  ordenes.push(nuevaOrden);
+
+  return res.status(201).json({
+    ok: true,
+    msg: "Orden creada correctamente",
+    orden: nuevaOrden,
+  });
 };
 
-// GET /api/ordenes
-exports.listarOrdenes = async (req, res) => {
-  try {
-    const data = await ordenesService.listarOrdenes();
-    return res.json({ ok: true, data });
-  } catch (err) {
-    console.error("❌ Error listarOrdenes:", err.message);
-    return res.status(500).json({ ok: false, msg: "Error listando órdenes" });
-  }
-};
+// ===============================
+// PATCH - ACTUALIZAR ESTADO
+// ===============================
 
-// PATCH /api/ordenes/:id
-exports.actualizarEstado = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { estado } = req.body;
+exports.actualizarEstadoOrden = async (req, res) => {
+  const id = Number(req.params.id);
+  const { estado } = req.body;
 
-    const result = await ordenesService.actualizarEstado(id, estado);
-    return res.json({ ok: true, ...result });
-  } catch (err) {
-    console.error("❌ Error actualizarEstado:", err.message);
-    return res.status(400).json({ ok: false, msg: err.message });
+  const orden = ordenes.find((o) => o.id === id);
+
+  if (!orden) {
+    return res.status(404).json({
+      ok: false,
+      msg: "Orden no encontrada",
+    });
   }
+
+  orden.estado = estado;
+
+  return res.json({
+    ok: true,
+    msg: "Estado actualizado",
+    orden,
+  });
 };

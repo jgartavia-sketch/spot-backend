@@ -10,7 +10,14 @@ const TABLE = "productosa";
 // ============================================
 async function obtenerTodos() {
   const [rows] = await db.query(
-    `SELECT id, nombre, descripcion, precio, imagen
+    `SELECT 
+       id, 
+       nombre, 
+       descripcion, 
+       precio, 
+       stock,
+       imagen_url AS imagen,
+       categoria
      FROM ${TABLE}
      ORDER BY id DESC`
   );
@@ -22,7 +29,14 @@ async function obtenerTodos() {
 // ============================================
 async function obtenerPorId(id) {
   const [rows] = await db.query(
-    `SELECT id, nombre, descripcion, precio, imagen
+    `SELECT 
+       id, 
+       nombre, 
+       descripcion, 
+       precio, 
+       stock,
+       imagen_url AS imagen,
+       categoria
      FROM ${TABLE}
      WHERE id = ?`,
     [id]
@@ -33,13 +47,14 @@ async function obtenerPorId(id) {
 
 // ============================================
 // CREAR NUEVO PRODUCTO
+// Nota: mapeamos "imagen" del cuerpo a "imagen_url" en la DB
 // ============================================
-async function crearProducto({ nombre, descripcion, precio, imagen }) {
+async function crearProducto({ nombre, descripcion, precio, imagen, stock = 0, categoria = null }) {
   const [result] = await db.query(
     `INSERT INTO ${TABLE}
-     (nombre, descripcion, precio, imagen)
-     VALUES (?, ?, ?, ?)`,
-    [nombre, descripcion, precio, imagen]
+     (nombre, descripcion, precio, stock, imagen_url, categoria)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [nombre, descripcion, precio, stock, imagen, categoria]
   );
 
   return result.insertId;
@@ -50,13 +65,19 @@ async function crearProducto({ nombre, descripcion, precio, imagen }) {
 // ============================================
 async function actualizarProducto(
   id,
-  { nombre, descripcion, precio, imagen }
+  { nombre, descripcion, precio, imagen, stock, categoria }
 ) {
   const [result] = await db.query(
     `UPDATE ${TABLE}
-     SET nombre = ?, descripcion = ?, precio = ?, imagen = ?
+     SET 
+       nombre = ?, 
+       descripcion = ?, 
+       precio = ?, 
+       stock = ?, 
+       imagen_url = ?, 
+       categoria = ?
      WHERE id = ?`,
-    [nombre, descripcion, precio, imagen, id]
+    [nombre, descripcion, precio, stock, imagen, categoria, id]
   );
 
   return result.affectedRows > 0;

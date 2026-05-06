@@ -5,9 +5,8 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ESTADOS_VALIDOS = ["pendiente", "revisada", "cerrada", "cancelada"];
 
 module.exports = {
-
   // ===============================
-  // VALIDACIONES AVANZADAS
+  // VALIDACIONES
   // ===============================
   validar(data) {
     const errores = [];
@@ -57,7 +56,7 @@ module.exports = {
   },
 
   // ===============================
-  // NORMALIZAR DATOS
+  // NORMALIZAR
   // ===============================
   normalizar(data) {
     return {
@@ -77,7 +76,7 @@ module.exports = {
   },
 
   // ===============================
-  // OBJETO FINAL PARA DB
+  // OBJETO DB
   // ===============================
   crearObjetoReserva(data) {
     const now = new Date();

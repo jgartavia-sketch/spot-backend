@@ -13,11 +13,10 @@ const requireAdmin = require("../middlewares/requireAdmin");
 router.post("/", reservasController.crearReserva);
 
 // =======================================
-// LISTAR RESERVAS (TOKEN)
+// LISTAR RESERVAS (TEMPORALMENTE PÚBLICO)
 // =======================================
 router.get(
   "/",
-  auth,
   reservasController.listarReservasPaginadas
 );
 

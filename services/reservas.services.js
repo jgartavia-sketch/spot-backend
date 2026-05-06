@@ -29,6 +29,7 @@ async function contarTotal() {
 // CREAR RESERVA
 async function crear(data) {
   const now = new Date();
+  const estado = data.estado ?? "pendiente"; // 👈 default agregado
 
   const [result] = await db.query(
     `INSERT INTO ${TABLE}
@@ -41,7 +42,7 @@ async function crear(data) {
       data.motivo,
       data.mensaje,
       data.fecha,
-      data.estado,
+      estado,
       now,
       now,
     ]
